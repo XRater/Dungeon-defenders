@@ -33,6 +33,7 @@ class Background( Layer ):
 class Coin (Layer):
 	def __init__(self):
 		super(Coin, self).__init__()
+<<<<<<< HEAD
 		self.coins = [pyglet.resource.image('coins/coin%s.png' %  coin_image) for coin_image in range(Coin_image_number)]
 		self.coin_anim  = pyglet.image.Animation.from_image_sequence(self.coins, 0.1, True)
 		self.coin = Sprite(self.coin_anim, (1400, 900))
@@ -45,3 +46,24 @@ class HUD(Layer):
 		super( HUD, self).__init__()
 		self.add( Background(), z = 0 )
 		self.add( Coin(), z = 2 )
+=======
+		w, h = director.get_window_size()
+		self.coins = [pyglet.resource.image('coins/coin%s.png' %  coin_image) for coin_image in range(Coin_image_number)]
+		self.coin_anim  = pyglet.image.Animation.from_image_sequence(self.coins, 0.1, True)
+		self.coin = Sprite(self.coin_anim, (w - 300, h - 50))
+	def draw(self):
+		self.coin.draw()		
+	
+class HUD_DM(Layer):
+	def __init__(self):
+		
+		super( HUD_DM, self).__init__()
+		#self.add( Background(), z = 0 )
+		self.add( Coin(), z = 2 )
+		
+class HUD_P(Layer):
+	def __init__(self):
+		
+		super( HUD_P, self).__init__()
+		#self.add( Background(), z = 0 )
+>>>>>>> origin/master
