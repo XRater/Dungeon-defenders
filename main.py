@@ -16,7 +16,6 @@ from cocos.sprite import *
 from cocos.menu import *
 from cocos.text import *
 from HUD import Background
-from status import Status
 
 import pyglet
 from pyglet import gl, font

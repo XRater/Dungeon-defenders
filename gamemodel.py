@@ -20,7 +20,6 @@ from cocos.text import Label
 from Images import *
 from const import *
 from HUD import *
-from status import *
 
 import random
 
