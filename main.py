@@ -16,6 +16,14 @@ from cocos.sprite import *
 from cocos.menu import *
 from cocos.text import *
 from HUD import Background
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+from status import Status
+>>>>>>> origin/master
+>>>>>>> origin/master
 
 import pyglet
 from pyglet import gl, font
@@ -54,8 +62,17 @@ class MainMenu( Menu ):
 
 	def on_newgame(self):
 		import game_view
+<<<<<<< HEAD
 		director.push( FadeTransition(
+=======
+<<<<<<< HEAD
+		director.push( FadeTRTransition(
+			game_view.get_newgame(), 1.5 ) )
+=======
+		director.push( FlipX3DTransition(
+>>>>>>> origin/master
 			game_view.get_newgame_DM(), 1.5 ) )
+>>>>>>> origin/master
 		
 	def on_quit(self):
 		pyglet.app.exit()
