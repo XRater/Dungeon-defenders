@@ -16,7 +16,6 @@ from cocos.sprite import *
 from cocos.menu import *
 from cocos.text import *
 from HUD import Background
-from status import Status
 
 import pyglet
 from pyglet import gl, font
@@ -34,10 +33,10 @@ class MainMenu( Menu ):
 		self.font_title['font_size'] = 72
 		self.font_title['color'] = (245,184,16,255)
 
-		self.font_item['font_name'] = 'Edit Undo Line BRK',
+		self.font_item['font_name'] = 'Courier New',
 		self.font_item['color'] = (32,16,32,255)
 		self.font_item['font_size'] = 40
-		self.font_item_selected['font_name'] = 'Edit Undo Line BRK'
+		self.font_item_selected['font_name'] = 'Courier New'
 		self.font_item_selected['color'] = (255, 0, 255,255)
 		self.font_item_selected['font_size'] = 54
 
@@ -55,7 +54,7 @@ class MainMenu( Menu ):
 
 	def on_newgame(self):
 		import game_view
-		director.push( FlipX3DTransition(
+		director.push( FadeTransition(
 			game_view.get_newgame_DM(), 1.5 ) )
 		
 	def on_quit(self):
