@@ -287,28 +287,31 @@ class GameView_P(GameView):
 		self.hero_number = 0
 		self.actual_hero = self.model.heroes[self.alive_heroes[self.hero_number]]
 		self.skill_use_layer = ColorLayer(51, 123, 204, 100)
+		#self.skill_use_layer = Skill_use_layer()
 		self.status = 'usuall'
 		self.model.push_handlers(self.on_art_get)
 		
 	def reload(self):
 		check = 0
-		for hero_name in self.parent.model.heroes:
-			hero = self.parent.model.heroes[hero_name]
-			if (hero.alive):
-				hero.turnav = hero.techstats.speed
-				check = 1
-				for skill in hero.skills:
-					skill.skill.next_turn()
-		
-		self.hero_number = 0
-		self.actual_hero = self.model.heroes['wizard']
-		if check:
-			self.next_hero(1)
 			
 		for i in range(self.mapx):
 			for j in range (self.mapy):	
 				c = self.parent.model.map.get((i, j))
 				c.next_turn()
+				
+		for monster in self.model.monsters:
+			monster.reload()
+		
+		for hero_name in self.parent.model.heroes:
+			hero = self.parent.model.heroes[hero_name]
+			if (hero.alive):
+				hero.reload()
+				check = 1
+		
+		self.hero_number = 0
+		self.actual_hero = self.model.heroes['wizard']
+		if check:
+			self.next_hero(1)
 	
 	def on_art_get(self, artmenu):
 		self.status = 'art_menu'
@@ -490,6 +493,7 @@ class GameView_P(GameView):
 								if (self.model.skill_use == 0) and (self.status == 'usuall'):
 									self.next_hero(-1)	
 								if self.model.skill_use:
+									#skill_layer = skill.get_layer()
 									self.add(self.skill_use_layer)
 			
 				#Reaction on next turn button  click
@@ -598,20 +602,24 @@ class Art_get_layer(ColorLayer):
 				number = 5
 		if (get_art):
 			hero = self.art_menu.hero
-			art_name = Art_menu[hero.name][hero.stats.lvl][number]
+			art_name = Art_menu[hero.name][hero.art_cell + 1][number]
 			if (hero.av_art.count(art_name)):
-				art = Artefact(art_name, len(hero.staff))
+				art = Artefact(art_name, hero.art_cell)
+				hero.staff.update({hero.art_cell : art})
 				hero.av_art.remove(art_name)
-				hero.staff.append(art)
+				for i in range(5):
+					if (hero.staff.get(i) == None):
+						hero.art_cell = i
+						break
 				art.on_get(hero)
 				self.main_layer.status = 'usuall'
 				self.main_layer.remove(self.main_layer.art_get_layer)
 				self.main_layer.art_get_layer = 0
 		
 	def draw(self):
+	
 		self.sprite.draw()
 		self.art_menu.draw()
-		
 		
 def get_newgame_DM():
 	gamescene = Scene()

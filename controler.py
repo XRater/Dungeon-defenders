@@ -16,9 +16,8 @@ class Controler():
 		self.model.interface_DM.portraits[name].reload(self.model, name)
 		if (self.hero.stats.health <= 0):
 			if (self.hero.alive):
-				self.hero.alive = 0
-				self.model.alive_heroes.remove(self.hero.name)
-				self.model.on_gameover()
+				self.hero.health = 0
+				self.kill_hero(name)
 				
 	def heal_hero(self, name, heal):
 		self.hero = self.model.heroes[name]
@@ -34,9 +33,21 @@ class Controler():
 		
 	
 	def kill_hero(self, name):
-		self.hero = self.models.heroes[name]
-		
-	
+		self.hero = self.model.heroes[name]
+		surr = 0
+		if self.hero.effects.revive_art:
+			surr = 1
+			del self.hero.staff[0]
+			self.hero.av_art.append('redking_belt')
+			self.heal_hero(self.hero.name, 50)
+			for i in range(5):
+				if (self.hero.staff.get(i) == None):
+					self.hero.art_cell = i
+					break
+		if (surr == 0):
+			self.hero.alive = 0
+			self.model.alive_heroes.remove(self.hero.name)
+			self.model.on_gameover()
 	
 		
 		

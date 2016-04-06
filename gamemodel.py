@@ -107,6 +107,7 @@ class Tile():
 		self.monster = 0
 		self.smoke = 0
 		self.buildav = 1
+		self.wall = 0
 	
 	def next_turn(self):
 		if self.smoke:
@@ -267,12 +268,15 @@ class Hero():
 		self.alive = 1
 		self.techstats = Tech_Stats(self.name)
 		self.stats = Stats(self.name)
-		self.staff = []
+		self.staff = {}
 		self.av_art = list(Artefacts)
+		self.art_cell = 0
 		self.model = model
 		self.turnav = self.techstats.speed
 		self.stats.health = self.techstats.max_health
 		self.skills = []
+		self.effects = Hero_effects(self, self.model)
+		
 		for s in Hero_skills[self.name]:
 			self.skills.append(Skill(s[0], s[1], self, self.model))
 	
@@ -288,12 +292,19 @@ class Hero():
 		replace_hero = 1
 		if (tile.name == 'lava'):
 			self.model.controler.damage_hero(self.name, lava_damage)
+		if (tile.name == 'ice'):
+			self.turnav = 0
+			self.effects.miss_turn = 1
+		if (tile.name == 'poison'):
+			self.effects.trap_poison = trap_poison_duration
 		if (tile.name == 'wall'):
 			replace_hero = 0
 		if (tile.monster):
 			result = tile.monster.monster.fight(self)
 			if result == 'lose':
 				replace_hero = 0
+			if result == 'win':
+				self.on_win()
 		if (tile.open_P == 0):
 			self.stats.exp = self.stats.exp + self.techstats.exp_per_tile
 			if self.stats.lvl < maxlvl:
@@ -302,24 +313,67 @@ class Hero():
 			if (tile.name == 'floor'):	
 				self.stats.luck = self.stats.luck + self.techstats.luck_per_tile
 				if self.stats.luck >= 100:
-					self.stats.luck = self.stats.luck - 100
-					if (len(self.staff) < 5):
-						self.stats.luck = 0
-						self.model.on_artget(self)
-						'''art_name = self.av_art[random.randint(0, len(self.av_art) - 1)]
-						art = Artefact(art_name, len(self.staff))
-						self.av_art.remove(art_name)
-						self.staff.append(art)
-						art.on_get(self)'''
+					if (self.stats.lvl >= self.art_cell + 1):
+						self.stats.luck = self.stats.luck - 100
+						if (len(self.staff) < 5):
+							self.stats.luck = 0
+							self.model.on_artget(self)
+					else:
+						self.stats.luck = self.stats.luck - self.techstats.luck_per_tile
 		if replace_hero:
 			self.replace_hero(tile.map_pos_x, tile.map_pos_y)
 		if (tile.name == 'treasure'):
 			self.model.on_youwin()
+		self.effects.on_turn_effects()
+	
+	def on_win(self):
+		if self.effects.drain_life:
+			self.stats.health = self.stats.health + drain_health
+			self.techstats.max_health = self.techstats.max_health + drain_health
+			self.stats.armor = self.stats.armor + drain_armor
+			self.stats.attack = self.stats.attack + drain_attack
 	
 	def draw(self):
 		self.sprite.draw()
 		self.icon.draw()
 		
+	def reload(self):
+		self.turnav = self.techstats.speed
+		self.effects.reload()
+		
+	
+class Hero_effects():
+
+	def __init__(self, hero, model):
+		self.hero = hero
+		self.model = model
+		self.miss_turn = 0
+		self.trap_poison = 0
+		self.circle_of_light = 0
+		self.drain_life = 0
+		self.revive_art = 0
+		
+	def on_turn_effects(self):
+		if self.circle_of_light:
+			for dx, dy in adject_tiles:
+				i = self.hero.map_posx + dx
+				j = self.hero.map_posy + dy
+				if (i >= 0) and (j >= 0) and (i < Quad_side) and (j < Quad_side):
+					tile = self.model.map.get((i, j))
+					tile.open_P = 1
+					
+	def reload(self):
+		for skill in self.hero.skills:
+			skill.skill.next_turn()
+		if self.miss_turn:
+			self.hero.turnav = 0
+			self.miss_turn = self.miss_turn - 1
+		if self.trap_poison:
+			self.model.controler.damage_hero(self.hero.name, trap_poison_damage)
+			self.trap_poison = self.trap_poison - 1
+		if self.circle_of_light:
+			self.circle_of_light = self.circle_of_light - 1
+	
 class Artefact():
 	def __init__(self, name, number):
 		w, h = director.get_window_size()
@@ -415,7 +469,7 @@ class Portraits():
 		c = HeroStats(self.hero)
 		c.draw()
 		for art in self.hero.staff:
-			art.draw()
+			self.hero.staff[art].draw()
 		for skill in self.hero.skills:
 			skill.draw()
 	
@@ -455,7 +509,7 @@ class Art_Menu():
 		sc = 1920//w
 		self.hero = hero
 		self.model = model
-		self.arts = Art_menu[hero.name][hero.stats.lvl]
+		self.arts = Art_menu[hero.name][hero.art_cell + 1]
 		self.art_sprites = {}
 		for number in range(len(self.arts)):	
 			self.art_sprites[number] = Sprite(Images.art_image[self.arts[number]], 
